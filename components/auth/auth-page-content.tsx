@@ -110,30 +110,17 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true); setError('')
-    const emailError = validateEmail(email)
-    if (emailError) {
-      setError(emailError)
-      setLoading(false)
-      return
+    if (!/^[a-zA-Z0-9._%+-]+@iiitl\.ac\.in$/i.test(email)) {
+      setError('Only IIITL email addresses (@iiitl.ac.in) are allowed'); setLoading(false); return
     }
     try {
       const result = await signIn('credentials', { redirect: false, email, password })
       if (result?.error) {
-        if (result.error === 'PASSWORD_NOT_SET') {
-          router.push(`/auth/set-password?email=${encodeURIComponent(email)}`)
-          return
-        }
-        setError(result.error === 'Invalid Credentials' ? 'Invalid email or password' : result.error)
-      } else if (result?.ok) {
-        router.push('/')
-        router.refresh()
-      }
-    } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
-      setError(errMsg)
-    } finally {
-      setLoading(false)
-    }
+        if (result.error === 'PASSWORD_NOT_SET') { router.push(`/auth/set-password?email=${encodeURIComponent(email)}`); return }
+        setError(result.error === 'Invalid Credentials' ? 'Invalid email or password.' : result.error)
+      } else if (result?.ok) { router.push('/'); router.refresh() }
+    } catch { setError('Something went wrong.') }
+    finally { setLoading(false) }
   }
 
   const handleGoogle = async () => {
@@ -143,7 +130,7 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
   return (
     <div style={{ width: '100%' }}>
-      <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: textColor, textAlign: 'center' }}>Welcome back! 👋</h2>
+      <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: textColor, textAlign: 'center' }}>Welcome back!</h2>
       <p style={{ margin: '0 0 24px', fontSize: 13, color: subText, textAlign: 'center' }}>Login to continue to StudentHub</p>
 
       <GoogleBtn loading={gLoading} disabled={disabled} onClick={handleGoogle} />
@@ -154,7 +141,7 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           <label style={lbl}>Email address</label>
           <div style={{ position: 'relative' }}>
             <Mail size={15} style={ico} />
-            <input id="signin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@college.edu" disabled={disabled} required style={inp} />
+            <input id="signin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@iiitl.ac.in" disabled={disabled} required style={inp} />
           </div>
         </div>
 
@@ -265,7 +252,7 @@ function SignUpForm({ onSwitch }: { onSwitch: () => void }) {
   return (
     <div style={{ width: '100%' }}>
       <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: textColor, textAlign: 'center' }}>
-        {step === 1 ? 'Create your account ✨' : 'Set your password 🔒'}
+        {step === 1 ? 'Create your account' : 'Set your password'}
       </h2>
       <p style={{ margin: '0 0 24px', fontSize: 13, color: subText, textAlign: 'center' }}>
         {step === 1 ? 'Join thousands of students on StudentHub' : 'Almost done! Set a strong password to secure your account'}
